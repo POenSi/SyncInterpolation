@@ -1,6 +1,10 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <string>
+#include <iostream>
+#include <cmath>
+#include <ctime>
 
 using namespace std;
 
@@ -17,25 +21,34 @@ double sinc(double x) {
 
 int main() {
 
-    unsigned int initialSize = 200;
+
+
+
+    ifstream input("input.txt");
+    long fullSize = 1000000;
+    auto *initial = (double *) malloc(fullSize * sizeof(double));
+
+    unsigned int lineCount = 0;
+    for (string line; getline(input, line);) {
+        double d;
+        input >> d;
+        initial[lineCount] = d;
+        lineCount++;
+    }
+    input.close();
+    cout << lineCount << "\n";
+
+    const clock_t start = clock();
+
+    unsigned int initialSize = lineCount;
     unsigned int discretization = 50;
-    unsigned int calculationHalfWidth = 20;
-    double T = 50;
+    unsigned int calculationHalfWidth = 200;
+    double T = discretization;
     int discretizationLength = initialSize * discretization;
 
 
-    auto *initial = (double *) malloc(initialSize * sizeof(double));
     auto *interpolated = (double *) malloc(discretizationLength * sizeof(double));
 
-    for (int i = 0; i < initialSize; i++) {
-        if ((i > 50) && (i < 150)) {
-            initial[i] = 1;
-        } else {
-            initial[i] = 0;
-        }
-    }
-
-    initial[initialSize / 2] = 100;
 
     ofstream file2;
     file2.open("file2.txt");
@@ -53,10 +66,20 @@ int main() {
     }
 
 
+    clock_t now = clock();
+    clock_t delta = now - start;
+    double milliSecondsElapsed = static_cast<double>(delta) / CLOCKS_PER_SEC * 1e3;
+    cout << "calculation time " << milliSecondsElapsed << " ms\n";
+
+
+
     file2.close();
 
     ofstream file;
     file.open("file.txt");
+    file.precision(10);
+    file.setf(ios::fixed);
+    file.setf(ios::showpoint);
 
     for (int i = 0; i < discretizationLength; i++) {
         file << interpolated[i] << "\n";
